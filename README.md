@@ -9,6 +9,6 @@ Well, it's the *thinking emoji*, but *thonking* is the meme of it. I can't be mo
 
 ### What's possible with this plugin?
 Actually, nothing. Soon, I'll add more options in a *config* like the possibility to : 
-- change the *thonking*'s skin !
-- exclude a player from having the skin...
+- change the thonking head's skin
+- exclude a player from having the skin
 - And many more!
