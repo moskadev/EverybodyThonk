@@ -18,12 +18,10 @@ class ThonkHead{
 	/** @var string */
 	private static $skinData = "";
 
-
 	public static function init() : void{
 		self::$geometryData = self::decompress(self::THONK_HEAD_GEOMETRY_DATA);
 		self::$skinData = self::skinToPNG(self::decompress(self::THONK_HEAD_SKIN_DATA));
 	}
-
 
 	/**
 	 * @return string
@@ -38,7 +36,6 @@ class ThonkHead{
 	public static function getSkinData() : string{
 		return self::$skinData;
 	}
-
 
 	/**
 	 * TODO: make this code better
