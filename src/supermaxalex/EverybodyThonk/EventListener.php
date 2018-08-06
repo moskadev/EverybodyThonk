@@ -12,14 +12,16 @@ class EventListener implements Listener{
 	 * @param PlayerJoinEvent $event
 	 */
 	public function onPlayerJoin(PlayerJoinEvent $event) : void{
-		Main::thonk($event->getPlayer());
+		if (!$event->isCancelled()) {
+			ThonkHead::applyTo($event->getPlayer());
+		}
 	}
-
 	/**
 	 * @param PlayerChangeSkinEvent $event
 	 */
 	public function onPlayerChangeSkin(PlayerChangeSkinEvent $event) : void{
-		Main::thonk($event->getPlayer(), $event->getNewSkin());
-
+		if(!$event->isCancelled()){
+			ThonkHead::applyTo($event->getPlayer(), $event->getNewSkin());
+		}
 	}
 }

@@ -3,7 +3,7 @@
 namespace supermaxalex\EverybodyThonk;
 
 use pocketmine\entity\Skin;
-use pocketmine\utils\BinaryStream;
+use pocketmine\Player;
 use pocketmine\utils\UUID;
 
 class ThonkHead{
@@ -20,7 +20,7 @@ class ThonkHead{
 
 	public static function init() : void{
 		self::$geometryData = self::decompress(self::THONK_HEAD_GEOMETRY_DATA);
-		self::$skinData = self::skinToPNG(self::decompress(self::THONK_HEAD_SKIN_DATA));
+		self::$skinData = SkinManager::skinToPNG(self::decompress(self::THONK_HEAD_SKIN_DATA));
 	}
 
 	/**
@@ -38,15 +38,48 @@ class ThonkHead{
 	}
 
 	/**
+	 * @param Player $player
+	 * @param Skin $playerSkin
+	 */
+	public static function applyTo(Player $player, ?Skin $playerSkin = null) : void{
+		$skin = $playerSkin ?? $player->getSkin();
+		$modifiedSkin = self::modifySkin($skin);
+
+		SkinManager::setOldPlayerSkin($player->getRawUniqueId(), $skin);
+
+		//hack for 1.5 #blamemojang
+		$player->getServer()->removePlayerListData($player->getUniqueId());
+		$player->getServer()->updatePlayerListData($player->getUniqueId(), $player->getId(), $player->getName(), $modifiedSkin, $player->getXuid());
+
+		//old code #blamemojang
+		//$player->setSkin($modifiedSkin);
+		//$player->sendSkin();
+	}
+
+	/**
+	 * @param Player $player
+	 */
+	public static function removeFrom(Player $player) : void{
+		$oldSkin = SkinManager::getOldPlayerSkin($player->getRawUniqueId());
+		//hack for 1.5 #blamemojang
+		$player->getServer()->removePlayerListData($player->getUniqueId());
+		$player->getServer()->updatePlayerListData($player->getUniqueId(), $player->getId(), $player->getName(), $oldSkin, $player->getXuid());
+
+		//old code #blamemojang
+		//$player->setSkin($oldSkin);
+		//$player->sendSkin();
+	}
+
+	/**
 	 * TODO: make this code better
 	 *
 	 * @param Skin $skin
 	 * @return Skin
 	 */
-	public static function setThonkHead(Skin $skin) : Skin{
+	public static function modifySkin(Skin $skin) : Skin{
 		$geometryData = json_decode($skin->getGeometryData(), true);
 		if(!is_array($geometryData)){
-			return $skin;
+			return $skin; //avoid errors
 		}
 		$geometryName = $originalGeometryName = "";
 		$skinGeometryName = $skin->getGeometryName();
@@ -64,7 +97,7 @@ class ThonkHead{
 			}
 		}
 		if($geometryName === ""){
-			return $skin;
+			return $skin; //avoid errors
 		}
 		$newGeometryData = [];
 		$newGeometryName = $geometryName . random_int(1000, 100000000); //little hack to avoid problems with others geometries
@@ -87,92 +120,18 @@ class ThonkHead{
 			}
 		}
 
-		$skinPNG = self::skinToPNG($skin->getSkinData());
+		$skinPNG = SkinManager::skinToPNG($skin->getSkinData());
 		if(!imagecopymerge($skinPNG, self::$skinData, 0, 0, 0, 0, 32, 16, 100)){ //apply the thonk head to the actual skin
-			return $skin;
+			return $skin; //avoid errors
 		}
 
 		return new Skin(
 			"Thonk" . UUID::fromRandom(),
-			self::skinToBinary($skinPNG),
+			SkinManager::skinToBinary($skinPNG),
 			$skin->getCapeData(),
 			$newGeometryName,
 			json_encode($newGeometryData)
 		);
-	}
-
-
-	/**
-	 * Thanks to SalmonDE and Muqsit for their code.
-	 *
-	 * @param string $skinData
-	 * @return resource
-	 */
-	private static function skinToPNG(string $skinData){
-		switch(strlen($skinData)){
-			case 8192:
-				$maxX = 64;
-				$maxY = 32;
-				break;
-
-			case 16384:
-				$maxX = 64;
-				$maxY = 64;
-				break;
-
-			case 65536:
-				$maxX = 128;
-				$maxY = 128;
-				break;
-
-			default:
-				throw new \InvalidArgumentException('Inappropriate skinData length: ' . strlen($skinData));
-		}
-
-		$img = imagecreatetruecolor($maxX, $maxY);
-		imagealphablending($img, false);
-		imagesavealpha($img, true);
-		$stream = new BinaryStream($skinData);
-
-		for($y = 0; $y < $maxY; ++$y){
-			for($x = 0; $x < $maxX; ++$x){
-				$r = $stream->getByte();
-				$g = $stream->getByte();
-				$b = $stream->getByte();
-				$a = 127 - (int) floor($stream->getByte() / 2);
-
-				$colour = imagecolorallocatealpha($img, $r, $g, $b, $a);
-				imagesetpixel($img, $x, $y, $colour);
-			}
-		}
-
-		return $img;
-	}
-
-	/**
-	 * https://gist.github.com/jasonwynn10/4124fe36b8e6c8ae1adc3c8af468d38f
-	 *
-	 * @param resource $img
-	 * @return string
-	 */
-	private static function skinToBinary($img) : string{
-		$bytes = '';
-		$maxY = imagesy($img);
-		$maxX = imagesx($img);
-
-		for ($y = 0; $y < $maxY; ++$y) {
-			for ($x = 0; $x < $maxX; ++$x) {
-				$rgba = imagecolorat($img, $x, $y);
-				$a = ((~((int)($rgba >> 24))) << 1) & 0xff;
-				$r = ($rgba >> 16) & 0xff;
-				$g = ($rgba >> 8) & 0xff;
-				$b = $rgba & 0xff;
-				$bytes .= chr($r) . chr($g) . chr($b) . chr($a);
-			}
-		}
-		imagedestroy($img);
-
-		return $bytes;
 	}
 
 	/**
