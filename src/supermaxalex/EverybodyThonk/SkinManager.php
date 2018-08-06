@@ -7,7 +7,7 @@ use pocketmine\utils\BinaryStream;
 
 class SkinManager{
 
-	private static $oldPlayerSkins = [];
+	private static $originalPlayerSkins = [];
 
 	/**
 	 * Thanks to SalmonDE and Muqsit for their code.
@@ -86,15 +86,15 @@ class SkinManager{
 	 * @param string $playerUniqueId
 	 * @param Skin $skin
 	 */
-	public static function setOldPlayerSkin(string $playerUniqueId, Skin $skin) : void{
-		self::$oldPlayerSkins[$playerUniqueId] = $skin;
+	public static function setOriginalPlayerSkin(string $playerUniqueId, Skin $skin) : void{
+		self::$originalPlayerSkins[$playerUniqueId] = $skin;
 	}
 
 	/**
 	 * @param string $playerUniqueId
 	 * @return null|Skin
 	 */
-	public static function getOldPlayerSkin(string $playerUniqueId) : ?Skin{
-		return self::$oldPlayerSkins[$playerUniqueId];
+	public static function getOriginalPlayerSkin(string $playerUniqueId) : ?Skin{
+		return self::$originalPlayerSkins[$playerUniqueId];
 	}
 }

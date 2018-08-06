@@ -45,7 +45,7 @@ class ThonkHead{
 		$skin = $playerSkin ?? $player->getSkin();
 		$modifiedSkin = self::modifySkin($skin);
 
-		SkinManager::setOldPlayerSkin($player->getRawUniqueId(), $skin);
+		SkinManager::setOriginalPlayerSkin($player->getRawUniqueId(), $skin);
 
 		//hack for 1.5 #blamemojang
 		$player->getServer()->removePlayerListData($player->getUniqueId());
@@ -60,7 +60,7 @@ class ThonkHead{
 	 * @param Player $player
 	 */
 	public static function removeFrom(Player $player) : void{
-		$oldSkin = SkinManager::getOldPlayerSkin($player->getRawUniqueId());
+		$oldSkin = SkinManager::getOriginalPlayerSkin($player->getRawUniqueId());
 		//hack for 1.5 #blamemojang
 		$player->getServer()->removePlayerListData($player->getUniqueId());
 		$player->getServer()->updatePlayerListData($player->getUniqueId(), $player->getId(), $player->getName(), $oldSkin, $player->getXuid());
