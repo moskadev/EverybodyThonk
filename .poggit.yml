@@ -3,5 +3,6 @@ branches:
 - master
 projects:
   EverybodyThonk:
-    path: "EverybodyThonk/icon.png"
+    path: ""
+    icon: "EverybodyThonk/icon.png"
 ...
