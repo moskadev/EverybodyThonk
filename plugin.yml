@@ -1,5 +1,6 @@
 name: EverybodyThonk
 main: supermaxalex\EverybodyThonk\Main
 version: 1.0
-api: [3.0.0]
+api: 3.0.0
 author: supermaxalex
+extensions: gd
